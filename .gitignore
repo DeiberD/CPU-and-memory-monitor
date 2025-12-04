@@ -1,0 +1,96 @@
+# Compilados intermedios
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.ilk
+
+# Bibliotecas
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# Ejecutables
+*.exe
+*.out
+*.app
+*.elf
+*.bin
+
+# Archivos de dependencias
+*.d
+
+# Debug / profiling
+*.pdb
+*.idb
+*.dSYM/
+*.su
+*.gcda
+*.gcno
+*.gcov
+
+# Temporales
+*~
+*.tmp
+*.swp
+*.bak
+
+# Logs
+*.log
+
+# Directorios típicos de build
+build/
+Build/
+build*/
+bin/
+obj/
+out/
+
+# Make y Autotools
+Makefile.in
+/autom4te.cache
+/aclocal.m4
+/compile
+/config.guess
+/config.sub
+/config.log
+/config.status
+/configure
+/depcomp
+/install-sh
+/missing
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# CodeBlocks
+*.cbp
+*.layout
+*.depend
+
+# VSCode
+.vscode/
+
+# CLion / JetBrains
+.idea/
+cmake-build-*/
+
+# Visual Studio
+*.vcxproj*
+*.sln
+*.user
+*.filters
+Debug/
+Release/
+x64/
+x86/
+
+*.workspace
+
