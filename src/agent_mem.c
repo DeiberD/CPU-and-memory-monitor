@@ -1,17 +1,21 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include "structs.h"
 
-
 // Read memory information from /proc/meminfo and return it
-struct mem_values get_value_from_meminfo() {
-
-    static struct mem_values values;
+char* get_values_from_meminfo(short PORT, char* agent_ip) {
 
     FILE *f = fopen("/proc/meminfo", "r");
     if (!f) {
         perror("fopen /proc/meminfo");
-        return values;
+        return NULL;
     }
 
     char line[256];
@@ -26,21 +30,69 @@ struct mem_values get_value_from_meminfo() {
     }
     fclose(f);
 
-    // Store values in struct
-    values.mem_total_kb = mem_total_kb;
-    values.mem_available_kb = mem_available_kb;
-    values.mem_free_kb = mem_free_kb;
-    values.SwapTotal_kb = SwapTotal_kb;
-    values.SwapFree_kb = SwapFree_kb; 
+    unsigned int mem_used_mb = (mem_total_kb - mem_available_kb) / 1024;
+
+    // Fortmatted output
+    static char values[320];
+    int len = snprintf(values, sizeof(values),
+        "MEM;"
+        "%s;"
+        "%u;"
+        "%u;"
+        "%u;"
+        "%u;",
+        agent_ip,
+        mem_used_mb, 
+        mem_free_kb / 1024.0,
+        SwapTotal_kb / 1024.0,
+        SwapFree_kb / 1024.0);
 
     return values;
 }
 
-int main(void){
-    // Read memory information from /proc/meminfo
-    
-    struct mem_values meminfo = get_value_from_meminfo();
-    printf("%u", meminfo.mem_available_kb);
-    
+// Connect to server and return socket descriptor
+int connect_to_server(char* collector_ip, short PORT) {
+    int agentfd, r;
+    struct sockaddr_in server_addr;
+
+    // Socket creation
+    agentfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(agentfd < 0){
+        perror("\n--> Error en la creacion del socket");
+        exit(-1);
+    }
+
+    // Server address setup
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    inet_pton(AF_INET, collector_ip, &server_addr.sin_addr);
+
+    // Connect to server
+    r = connect(agentfd, (struct sockaddr *)&server_addr, (socklen_t)sizeof(struct sockaddr));
+    if(r < 0){
+        perror("\n--> Error en connect(): ");
+        exit(-1);
+    }
+
+    return agentfd;
+}
+
+int main(int argc, char *argv[]){
+    // Arguments
+    const char *server_ip = argv[1];
+    short port = atoi(argv[2]);
+    const char *agent_ip = argv[3];
+
+    int agentfd = connect_to_server(server_ip, port);
+    char* values;
+
+    // Send a message to the server in a loop 
+    while(1){
+        values = get_values_from_meminfo(port, (char*) agent_ip);
+        send(agentfd, values, strlen(values), 0);
+        sleep(2); 
+    }
+
+    close(agentfd);
     return 0;
 }
