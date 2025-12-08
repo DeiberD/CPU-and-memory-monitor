@@ -3,12 +3,13 @@
 
 #include "epoll.hpp"
 #include <vector>
+#include <unordered_map>
 #include <iostream>
 #include <iomanip>
 
 namespace visualize {
 
-void displayClients(std::vector<server::Client>& clients) {
+void displayClients(std::unordered_map<std::string, server::Client>& clients) {
     std::cout << "\033[2J\033[H";
     std::cout << std::fixed << std::setprecision(1);
     std::cout << "Clientes: " << clients.size() << "\n\n";
@@ -29,7 +30,7 @@ void displayClients(std::vector<server::Client>& clients) {
         
         std::cout << std::string(80, '-') << "\n";
 
-        for (auto& client : clients) {
+        for (auto& [ip, client] : clients) {
             auto& state = client.state();
             std::cout << std::left << std::setw(18) << state.ip
                       << std::right << std::setw(8) << state.cpu.usage

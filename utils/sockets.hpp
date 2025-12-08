@@ -36,11 +36,6 @@ private:
     int m_port;
 };
 
-struct AcceptResult {
-    int fd;
-    std::string ip;
-};
-
 class ServerTCP {
 public:
     ServerTCP(int fd) : m_fd(fd) {}
@@ -69,18 +64,14 @@ public:
         return ServerTCP{fd};
     }
 
-    result<AcceptResult> accept() {
+    int accept() {
         sockaddr_in addr{};
         socklen_t len = sizeof(addr);
         int clientFd = ::accept(m_fd, reinterpret_cast<sockaddr*>(&addr), &len);
         if (clientFd < 0) {
-            return std::unexpected(Error::UnknownError);
+            return clientFd;
         }
-        
-        std::array<char, INET_ADDRSTRLEN> ipStr{};
-        inet_ntop(AF_INET, &addr.sin_addr, ipStr.data(), ipStr.size());
-        
-        return AcceptResult{clientFd, std::string(ipStr.data())};
+        return clientFd;
     }
 
 private:

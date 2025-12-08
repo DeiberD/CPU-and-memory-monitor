@@ -32,34 +32,18 @@ int main(int argc, char* argv[]) {
     std::cout << "Servidor iniciado en puerto " << puerto << "\n";
 
     Epoll::Reactor reactor(serverFd);
-    visualize::displayClients(reactor.getClients());
 
     reactor.run([&](int fd, uint32_t events) {
         if (fd == serverFd) {
-            auto acceptResult = tcpServer.accept();
-            if (acceptResult) {
-                auto& connection = acceptResult.value();
-                reactor.addClient(connection.fd, connection.ip, EPOLLIN);
-                visualize::displayClients(reactor.getClients());
-            }
+            int newFd = tcpServer.accept();
+            reactor.watchFd(newFd);
         } 
         else if (events & EPOLLIN) {
-            auto& client = reactor.getClient(fd);
-
             std::array<char, 4096> buffer{};
             ssize_t bytes = read(fd, buffer.data(), buffer.size() - 1);
-
-            if (bytes <= 0) {
-                reactor.removeClient(fd);
-                close(fd);
-                visualize::displayClients(reactor.getClients());
-            } else {
-                std::string line(buffer.data(), bytes);
-                if (!line.empty() && line.back() == '\n') line.pop_back();
-                if (!line.empty() && line.back() == '\r') line.pop_back();
-                client.updateState(line);
-                visualize::displayClients(reactor.getClients());
-            }
+            std::string line(buffer.data(), bytes);
+            reactor.processLine(line, fd);
+            visualize::displayClients(reactor.getClientsMap());
         }
     });
 

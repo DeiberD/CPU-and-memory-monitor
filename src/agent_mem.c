@@ -37,12 +37,12 @@ char* get_values_from_meminfo(short PORT, char* agent_ip) {
     int len = snprintf(values, sizeof(values),
         "MEM;"
         "%s;"
-        "%u;"
-        "%u;"
-        "%u;"
-        "%u;",
+        "%.1f;"
+        "%.1f;"
+        "%.1f;"
+        "%.1f;",
         agent_ip,
-        mem_used_mb, 
+        (float)mem_used_mb, 
         mem_free_kb / 1024.0,
         SwapTotal_kb / 1024.0,
         SwapFree_kb / 1024.0);
