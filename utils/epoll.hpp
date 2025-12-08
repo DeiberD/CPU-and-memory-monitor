@@ -161,7 +161,7 @@ public:
         throw std::runtime_error("Client not found");
     }
 
-    const std::vector<server::Client>& getClients() const { return clients; }
+    std::vector<server::Client>& getClients() { return clients; }
 
 private:
     int m_epollfd { -1 };
