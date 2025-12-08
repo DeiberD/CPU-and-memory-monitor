@@ -94,3 +94,8 @@ x86/
 
 *.workspace
 
+fake_clients
+*.md
+monitor
+server
+/test
