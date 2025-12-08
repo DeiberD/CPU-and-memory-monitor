@@ -189,10 +189,6 @@ public:
         }
     }
 
-    void stop() {
-        m_running = false;
-    }
-
     auto& getClientsMap(){
         return clients;
     }
@@ -202,7 +198,6 @@ private:
     int m_epollfd { -1 };
     bool m_running { false };
     std::unordered_map<std::string, server::Client> clients;    // <ip, client>
-    int nextId { 0 };
 };
 
 } // namespace Epoll
