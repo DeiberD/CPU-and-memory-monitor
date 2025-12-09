@@ -5,6 +5,7 @@ Sistema de monitoreo distribuido que recopila y visualiza métricas de CPU y mem
 ## Autores
 
 - **[@daguilastro](https://github.com/daguilastro)** - Daniel Aguilar Castro
+- **[@feliariasg](https://github.com/feliariasg)** - Andres Felipe Arias Gonzalez
 - **[@DeiberD](https://github.com/DeiberD)** - Deiber Gongora Hurtado
 
 
