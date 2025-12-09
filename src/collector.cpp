@@ -41,6 +41,11 @@ int main(int argc, char* argv[]) {
         else if (events & EPOLLIN) {
             std::array<char, 4096> buffer{};
             ssize_t bytes = read(fd, buffer.data(), buffer.size() - 1);
+            if (bytes <= 0) {
+            epoll_ctl(reactor.m_epollfd, EPOLL_CTL_DEL, fd, nullptr);
+            close(fd);
+            return;
+            }
             std::string line(buffer.data(), bytes);
             reactor.processLine(line, fd);
             visualize::displayClients(reactor.getClientsMap());
