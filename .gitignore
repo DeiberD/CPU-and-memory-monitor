@@ -15,6 +15,7 @@
 
 # Ejecutables
 *.exe
+*exe
 *.out
 *.app
 *.elf
