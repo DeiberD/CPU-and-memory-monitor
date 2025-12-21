@@ -7,7 +7,9 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "structs.h"
+#include <signal.h>
+
+int agentfd = -1; // Global socket descriptor
 
 // Read memory information from /proc/meminfo and return it
 char* get_values_from_meminfo(short PORT, char* agent_ip) {
@@ -77,13 +79,25 @@ int connect_to_server(char* collector_ip, short PORT) {
     return agentfd;
 }
 
+void handler(int sig) {
+    if (agentfd != -1) {
+        shutdown(agentfd, SHUT_RDWR); 
+        close(agentfd);               
+    }
+    write(1, "Socket cerrado\n", 15); 
+    _exit(0); 
+}
+
 int main(int argc, char *argv[]){
+    signal(SIGINT, handler);  // Ctrl+C
+    signal(SIGTERM, handler); // kill normal
+
     // Arguments
     const char *server_ip = argv[1];
     short port = atoi(argv[2]);
     const char *agent_ip = argv[3];
 
-    int agentfd = connect_to_server(server_ip, port);
+    agentfd = connect_to_server(server_ip, port);
     char* values;
 
     // Send a message to the server in a loop 
@@ -93,6 +107,5 @@ int main(int argc, char *argv[]){
         sleep(2); 
     }
 
-    close(agentfd);
     return 0;
 }

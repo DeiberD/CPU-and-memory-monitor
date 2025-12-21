@@ -7,9 +7,12 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Read CPU information from /proc/stat and return it
 // Calcula el porcentaje de uso de CPU entre dos lecturas
+
+int agentfd = -1; // Global socket descriptor
 
 struct cpu_times {
     unsigned long user, nice, system, idle, iowait, irq, softirq;
@@ -108,13 +111,25 @@ int connect_to_server(char* collector_ip, short PORT) {
     return agentfd;
 }
 
+void handler(int sig) {
+    if (agentfd != -1) {
+        shutdown(agentfd, SHUT_RDWR); 
+        close(agentfd);               
+    }
+    write(1, "Socket cerrado\n", 15); 
+    _exit(0); 
+}
+
 int main(int argc, char *argv[]){
+    signal(SIGINT, handler);  // Ctrl+C
+    signal(SIGTERM, handler); // kill normal
+
     // Arguments
     const char *server_ip = argv[1];
     short port = atoi(argv[2]);
     const char *agent_ip = argv[3];
 
-    int agentfd = connect_to_server((char*)server_ip, port);
+    agentfd = connect_to_server((char*)server_ip, port);
     char* values;
 
     // Loop sending data
@@ -124,6 +139,5 @@ int main(int argc, char *argv[]){
         sleep(2);
     }
 
-    close(agentfd);
     return 0;
 }
